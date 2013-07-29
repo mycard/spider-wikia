@@ -44,7 +44,7 @@
           item = _ref[_i];
           showList(item.name, item.url);
         }
-        if (!res.next) {
+        if (res.next) {
           return spiderOneList(++page, res.next);
         } else {
           message('列表页采集完毕');

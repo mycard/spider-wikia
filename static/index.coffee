@@ -24,7 +24,7 @@ spiderList = ()->
 			for item in res.data
 				showList item.name, item.url
 
-			if !res.next # test
+			if res.next
 				# 继续处理下一页
 				spiderOneList ++page, res.next
 			else
