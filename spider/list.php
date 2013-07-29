@@ -1,48 +1,53 @@
 <?php
-define(BASE_URL, 'http://yugioh.wikia.com/');
+class SpiderList {
+	const BASE_URL = 'http://yugioh.wikia.com/';
+	protected $content;
 
-// 输入
-$url = urldecode($_GET['url']);
+	public function main($url) {
+		if (strpos($url, BASE_URL) !== 0) {
+			return array(
+				'state' => false,
+				'error' => 'url mismatch'
+			);
+		}
+		if (empty($url)) {
+			$url = self::BASE_URL.'wiki/Category:Card_Names';
+		}
 
-// 第一页url
-if (empty($url)) $url = BASE_URL.'wiki/Category:Card_Names';
-if (strpos($url, BASE_URL) !== 0) {
-	echo json_encode(array(
-		'state' => false,
-		'error' => 'url mismatch'
-	));
-	exit;
-}
-
-if (!$content = file_get_contents($url)) {
-	echo json_encode(array(
-		'state' => false,
-		'error' => 'connect failed'
-	));
-	exit;
-}
-
-// 获取下一页URL
-if (preg_match('#<a href="/([^"]*?)"[^>]*>next 200</a>#', $content, $m)) {
-	$next = BASE_URL . $m[1];
-} else {
-	$next = false;
-}
-
-// 获取当页所有卡片名
-$cards = array();
-if (preg_match_all('#href="/wiki/Card_Names:([^"]*)"#', $content, $m)) {
-	foreach ($m[1] as $card) {
-		$cards[] = array(
-			'name' => $card,
-			'url' => BASE_URL . 'wiki/' . $card
+		if (!$this->content = file_get_contents($url)) {
+			return array(
+				'state' => false,
+				'error' => 'connect failed'
+			);
+		}
+		$next = $this->get_next();
+		$cards = $this->get_cards();
+		return array(
+			'state' => true,
+			'next' => $next,
+			'data' => $cards
 		);
 	}
-}
 
-// 返回
-echo json_encode(array(
-	'state' => true,
-	'next' => $next,
-	'data' => $cards
-));
+	protected function get_next() {
+		// 获取下一页URL
+		if (preg_match('#<a href="/([^"]*?)"[^>]*>next 200</a>#', $content, $m)) {
+			return BASE_URL . $m[1];
+		}
+		return false;
+	}
+
+	protected function get_cards() {
+		// 获取当页所有卡片名
+		$cards = array();
+		if (preg_match_all('#href="/wiki/Card_Names:([^"]*)"#', $content, $m)) {
+			foreach ($m[1] as $card) {
+				$cards[] = array(
+					'name' => $card,
+					'url' => BASE_URL . 'wiki/' . $card
+				);
+			}
+		}
+		return $cards;
+	}
+}
