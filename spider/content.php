@@ -17,7 +17,7 @@ class SpiderContent {
 			);
 		}
 		$id = $this->get_card_id();
-		if (!$image = $this->get_image($id)) {
+		if (!$image = $this->get_image($id, $name)) {
 			return array(
 				'state' => false,
 				'error' => 'not a card page'
@@ -40,7 +40,7 @@ class SpiderContent {
 		return $id;
 	}
 
-	protected function get_image($id = '00000000') {
+	protected function get_image($id = '00000000', $name) {
 		// 采集图片
 		if (preg_match('#cardtable-cardimage[^<]*?<a[^>]*href="([^"]*)"[^>]*>#', $this->content, $m)) {
 			$image = $m[1];

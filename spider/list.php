@@ -4,14 +4,14 @@ class SpiderList {
 	protected $content;
 
 	public function main($url) {
-		if (strpos($url, BASE_URL) !== 0) {
+		if (empty($url)) {
+			$url = self::BASE_URL.'wiki/Category:Card_Names';
+		}
+		if (strpos($url, self::BASE_URL) !== 0) {
 			return array(
 				'state' => false,
 				'error' => 'url mismatch'
 			);
-		}
-		if (empty($url)) {
-			$url = self::BASE_URL.'wiki/Category:Card_Names';
 		}
 
 		if (!$this->content = file_get_contents($url)) {
@@ -31,8 +31,8 @@ class SpiderList {
 
 	protected function get_next() {
 		// 获取下一页URL
-		if (preg_match('#<a href="/([^"]*?)"[^>]*>next 200</a>#', $content, $m)) {
-			return BASE_URL . $m[1];
+		if (preg_match('#<a href="/([^"]*?)"[^>]*>next 200</a>#', $this->content, $m)) {
+			return self::BASE_URL . $m[1];
 		}
 		return false;
 	}
@@ -40,11 +40,11 @@ class SpiderList {
 	protected function get_cards() {
 		// 获取当页所有卡片名
 		$cards = array();
-		if (preg_match_all('#href="/wiki/Card_Names:([^"]*)"#', $content, $m)) {
+		if (preg_match_all('#href="/wiki/Card_Names:([^"]*)"#', $this->content, $m)) {
 			foreach ($m[1] as $card) {
 				$cards[] = array(
 					'name' => $card,
-					'url' => BASE_URL . 'wiki/' . $card
+					'url' => self::BASE_URL . 'wiki/' . $card
 				);
 			}
 		}
